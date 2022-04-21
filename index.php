@@ -55,7 +55,8 @@
                                             $getJadwal = mysqli_query($conn, "SELECT id_detail_event, sesi, kuota, status_detail_event, (SELECT COUNT(*) FROM peserta_vaksin P WHERE P.id_detail_event=J.id_detail_event AND status_peserta='1') AS terpakai FROM detail_event_vaksin J WHERE id_event=" . $event["id_event"] . " AND tanggal='" . $t["tanggal"] . "'");
                                             while ($j = mysqli_fetch_assoc($getJadwal)) {
                                                 $sisa = $j["kuota"]-$j["terpakai"];
-                                                $not_available = $sisa<=0 || $j["status_detail_event"] == 0 || $now>=$t["tanggal"] . " " . str_pad($j["sesi"], 2, "0", STR_PAD_LEFT) . ":00:00";
+                                                $n_sesi = ($j["sesi"] == "N" ? "11" : $j["sesi"]);
+                                                $not_available = $sisa<=0 || $j["status_detail_event"] == 0 || $now>=$t["tanggal"] . " " . str_pad($n_sesi, 2, "0", STR_PAD_LEFT) . ":00:00";
                                                 echo "<tr><td><label class='form-check-label'><input type='radio' class='form-check-input' name='schedule' value='" . $j["id_detail_event"] . "' " . ($not_available ? "disabled" : "") . " onChange='activateNextBtn()'>&nbsp;&nbsp;";
                                                 switch ($j["sesi"]) {
                                                     case "9": $sesi = "Sesi 1 (9.00 - 10.00)"; break;

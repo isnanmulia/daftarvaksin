@@ -1,6 +1,7 @@
 <?php
     $days = ["", "Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu", "Minggu"];
     $months = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    $today = date("Y-m-d");
     require_once 'config/setting_rs.php';
     require_once 'config/conn.php';
     if (isset($_POST["form_submit"])) {
@@ -27,9 +28,9 @@
         $etiket = preg_replace("/[?;'\"<>]/", "", $etiket);
         $etiket = trim(mysqli_real_escape_string($conn, $etiket));
         // check availability
-        $checkEvent = mysqli_query($conn, "SELECT status_event, kuota, (SELECT COUNT(*) FROM peserta_vaksin P WHERE P.id_detail_event=DE.id_detail_event AND status_peserta='1') AS terpakai FROM detail_event_vaksin DE INNER JOIN event_vaksin E ON DE.id_event=E.id_event WHERE id_detail_event=" . $_POST["schedule_id"]);
+        $checkEvent = mysqli_query($conn, "SELECT tanggal_selesai, status_event, kuota, (SELECT COUNT(*) FROM peserta_vaksin P WHERE P.id_detail_event=DE.id_detail_event AND status_peserta='1') AS terpakai FROM detail_event_vaksin DE INNER JOIN event_vaksin E ON DE.id_event=E.id_event WHERE id_detail_event=" . $_POST["schedule_id"]);
         $event = mysqli_fetch_assoc($checkEvent);
-        if ($event["status_event"] != "0" && $event["kuota"] > $event["terpakai"]) {
+        if ($event["status_event"] == "1" && $event["kuota"] > $event["terpakai"] && $today <= $event["tanggal_selesai"]) {
             // save the data
             $qInsertPeserta = "INSERT INTO peserta_vaksin (waktu_daftar, id_detail_event, nama, jk, nik, tanggal_lahir, kelompok_usia, alamat, no_hp, email, vaksin_ke, vaksin_primer, etiket_pl, status_peserta) VALUES (Now(), " . $_POST["schedule_id"] . ", '" . $namapx . "', '" . $_POST["inp_jk"] . "', '" . $nik . "', '" . $tgl_lahir . "', '" . $_POST["inp_klpusia"] . "', '" . $alamat . "', '" . $nohp . "', '" . $email . "', '" . $_POST["inp_vaksinke"] . "', " . $_POST["inp_jenisvaksin"] . ", '" . $etiket . "', '1')";
             $insertPeserta = mysqli_query($conn, $qInsertPeserta);
